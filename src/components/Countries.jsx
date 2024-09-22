@@ -4,11 +4,12 @@ import {
   addToVisited,
   clearVisitedList,
   getVisitedCountry,
+  removeFromVisited,
 } from "../utils/localStorage";
 
 const Countries = () => {
   const [countries, setCountries] = useState([]);
-  const [visitedCountry, setVisitedCountry] = useState([]);
+  // const [visitedCountry, setVisitedCountry] = useState([]);
 
   const [lsCountries, setLsCounties] = useState([]);
 
@@ -28,7 +29,7 @@ const Countries = () => {
       }
     }
     setLsCounties(savedCountries);
-  }, [countries, lsCountries]);
+  }, [countries]);
 
   const handleAddToVisitedList = (country) => {
     const alreadyAdded = lsCountries?.find((c) => c.cca2 === country.cca2);
@@ -36,21 +37,35 @@ const Countries = () => {
       return alert("This Country is already added!");
     } else {
       addToVisited(country);
+
+      // Update the state to reflect the new added country
+      setLsCounties((prevCountries) => [...prevCountries, country]);
+
       return alert("Country has been added successfully!");
     }
   };
 
   const handleRemoveFromVisited = (country) => {
-    const alreadyAdded = visitedCountry?.find((c) => c.cca2 === country.cca2);
+    const alreadyAdded = lsCountries?.find((c) => c.cca2 === country.cca2);
     if (alreadyAdded) {
-      const countryAfterRemoval = visitedCountry.filter(
+      // Remove from localStorage
+      removeFromVisited(country);
+
+      // Update the state to reflect the removed country
+      const countryAfterRemoval = lsCountries.filter(
         (c) => c.cca2 !== country.cca2
       );
-      setVisitedCountry(countryAfterRemoval);
+      setLsCounties(countryAfterRemoval);
+
       return alert("Country is removed from your visited list!");
     } else {
-      return alert("This country is not your visited list yet.");
+      return alert("This country is not in your visited list yet.");
     }
+  };
+
+  const clearVisited = () => {
+    clearVisitedList();
+    setLsCounties([]);
   };
 
   const [searchText, setSearchText] = useState("");
@@ -74,7 +89,7 @@ const Countries = () => {
           </h1>
           <button
             className="bg-red-500 py-1 px-2 font-mono text-xs rounded-md text-white font-semibold"
-            onClick={clearVisitedList}
+            onClick={clearVisited}
           >
             Clear Visited List
           </button>
@@ -82,7 +97,7 @@ const Countries = () => {
 
         <div className="grid grid-cols-3 md:grid-cols-8 gap-3 my-4">
           {lsCountries?.map((country) => (
-            <div className="border p-2 rounded-md">
+            <div key={country.cca3} className="border p-2 rounded-md">
               <p className="mb-2 border-b border-blue-400 font-semibold">
                 {country?.name?.common}
               </p>
